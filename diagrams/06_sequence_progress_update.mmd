@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor User
+    participant UI as Voice UI
+    participant API as FastAPI
+    participant Graph as LangGraph Agent
+    participant Match as Matching Service
+    participant Todo as Todo Service
+    participant Log as Time Log Service
+    participant DB as Database
+
+    User->>UI: "I completed the loan API bug"
+    UI->>API: Send transcript or audio result
+    API->>Graph: Run progress update graph
+    Graph->>DB: Load active tasks for today
+    DB-->>Graph: Active tasks
+    Graph->>Match: Compare spoken item with tasks
+    Match-->>Graph: Best match and confidence
+    alt High confidence
+        Graph->>Todo: mark_completed(task_id)
+        Todo->>DB: Update task status and completed_at
+        Graph->>Log: create_time_log(task_id)
+        Log->>DB: Insert time log
+        Graph-->>API: Completed and remaining tasks
+    else Ambiguous match
+        Graph-->>API: Ask user to confirm candidate
+    end
+    API-->>UI: Response
+    UI-->>User: Shows result
+

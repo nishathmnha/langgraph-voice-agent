@@ -1,0 +1,22 @@
+flowchart LR
+    User["User"]
+    VoiceUI["Voice UI<br/>React or Electron"]
+    FastAPI["FastAPI Backend"]
+    STT["Speech-to-Text Provider"]
+    Agent["LangGraph Todo Agent"]
+    Tools["Todo and Time Log Tools"]
+    DB[("SQLite / PostgreSQL")]
+    Dashboard["Dashboard / Reports"]
+
+    User -->|"speaks / types"| VoiceUI
+    VoiceUI -->|"audio upload"| FastAPI
+    VoiceUI -->|"text message"| FastAPI
+    FastAPI --> STT
+    STT -->|"transcript"| FastAPI
+    FastAPI --> Agent
+    Agent --> Tools
+    Tools --> DB
+    Agent -->|"response text"| FastAPI
+    FastAPI -->|"updated todos and text response"| VoiceUI
+    FastAPI -->|"time log API"| Dashboard
+    VoiceUI -->|"shows tasks and response"| User

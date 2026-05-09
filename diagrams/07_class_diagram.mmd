@@ -1,0 +1,77 @@
+classDiagram
+    class User {
+        int id
+        string display_name
+        string timezone
+        datetime created_at
+    }
+
+    class Task {
+        int id
+        int user_id
+        string title
+        string description
+        TaskStatus status
+        Priority priority
+        date due_date
+        time due_time
+        datetime completed_at
+    }
+
+    class TimeLog {
+        int id
+        int task_id
+        int user_id
+        date work_date
+        datetime start_time
+        datetime end_time
+        int duration_minutes
+        string note
+    }
+
+    class AgentSession {
+        string id
+        int user_id
+        string channel
+        string last_intent
+        string pending_clarification_json
+    }
+
+    class TaskMatchEvent {
+        int id
+        int task_id
+        string session_id
+        string spoken_text
+        float match_score
+        string decision
+    }
+
+    class TodoService {
+        create_task()
+        list_tasks()
+        update_task()
+        archive_task()
+        mark_completed()
+    }
+
+    class TimeLogService {
+        create_for_completion()
+        get_by_date_range()
+    }
+
+    class MatchingService {
+        find_candidates()
+        score_match()
+        needs_clarification()
+    }
+
+    User "1" --> "*" Task
+    User "1" --> "*" TimeLog
+    User "1" --> "*" AgentSession
+    Task "1" --> "*" TimeLog
+    Task "1" --> "*" TaskMatchEvent
+    AgentSession "1" --> "*" TaskMatchEvent
+    TodoService --> Task
+    TimeLogService --> TimeLog
+    MatchingService --> TaskMatchEvent
+

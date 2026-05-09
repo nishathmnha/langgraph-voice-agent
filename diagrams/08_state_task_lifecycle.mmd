@@ -1,0 +1,16 @@
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> IN_PROGRESS: user starts work
+    PENDING --> COMPLETED: user completes task
+    PENDING --> BLOCKED: user marks blocked
+    IN_PROGRESS --> COMPLETED: user completes task
+    IN_PROGRESS --> BLOCKED: blocker found
+    BLOCKED --> IN_PROGRESS: blocker resolved
+    BLOCKED --> COMPLETED: completed after unblock
+    PENDING --> ARCHIVED: delete or remove
+    IN_PROGRESS --> ARCHIVED: archive
+    BLOCKED --> ARCHIVED: archive
+    COMPLETED --> ARCHIVED: archive old task
+    COMPLETED --> IN_PROGRESS: reopen
+    ARCHIVED --> [*]
+

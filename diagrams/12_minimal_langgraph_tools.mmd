@@ -1,0 +1,51 @@
+flowchart TD
+    Audio["Audio input"]
+    STT["Speech-to-text"]
+    Graph["Single LangGraph agent"]
+    Intent["classify_intent"]
+    Route{"route_intent"}
+
+    Add["add_todo node"]
+    Update["update_todo node"]
+    Complete["complete_todo node"]
+    List["list_todos node"]
+    Clarify["clarify node"]
+
+    MatchTool["find_matching_todo tool"]
+    CreateTool["create_todo tool"]
+    UpdateTool["update_todo tool"]
+    CompleteTool["complete_todo tool"]
+    ListTool["list_todos tool"]
+
+    DB[("Todo database")]
+    Response["Text/UI response"]
+
+    Audio --> STT --> Graph --> Intent --> Route
+
+    Route -->|"new task"| Add
+    Route -->|"change priority/details"| Update
+    Route -->|"task completed"| Complete
+    Route -->|"what is left?"| List
+    Route -->|"unclear"| Clarify
+
+    Add --> CreateTool --> DB
+    Update --> MatchTool --> UpdateTool --> DB
+    Complete --> MatchTool --> CompleteTool --> DB
+    List --> ListTool --> DB
+    Clarify --> Response
+
+    DB --> Response
+
+    classDef input fill:#E8F3FF,stroke:#2563EB,color:#111827
+    classDef graphLayer fill:#F3E8FF,stroke:#7C3AED,color:#111827
+    classDef node fill:#ECFDF5,stroke:#059669,color:#111827
+    classDef tool fill:#FFF7ED,stroke:#EA580C,color:#111827
+    classDef data fill:#F9FAFB,stroke:#374151,color:#111827
+    classDef output fill:#FEF2F2,stroke:#DC2626,color:#111827
+
+    class Audio,STT input
+    class Graph,Intent,Route graphLayer
+    class Add,Update,Complete,List,Clarify node
+    class MatchTool,CreateTool,UpdateTool,CompleteTool,ListTool tool
+    class DB data
+    class Response output

@@ -1,0 +1,26 @@
+flowchart TD
+    A([Start day])
+    B["User speaks morning plan"]
+    C["Transcribe audio"]
+    D["Extract tasks"]
+    E{"Any missing required detail?"}
+    F["Ask clarification"]
+    G["Store pending tasks"]
+    H["User works during day"]
+    I["User speaks completed items"]
+    J["Transcribe progress update"]
+    K["Fuzzy-match spoken items to tasks"]
+    L{"Match confidence high?"}
+    M["Mark tasks completed"]
+    N["Create time logs"]
+    O["Ask user to confirm matching task"]
+    P["Show completed and remaining tasks"]
+    Q["Suggest next priority"]
+    R([End])
+
+    A --> B --> C --> D --> E
+    E -->|"yes"| F --> D
+    E -->|"no"| G --> H --> I --> J --> K --> L
+    L -->|"yes"| M --> N --> P --> Q --> R
+    L -->|"no"| O --> M
+

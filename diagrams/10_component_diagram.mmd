@@ -1,0 +1,52 @@
+flowchart TB
+    subgraph Client["Client Layer"]
+        React["React UI"]
+        Electron["Electron Shell"]
+        Audio["Audio Recorder"]
+    end
+
+    subgraph API["FastAPI Layer"]
+        AgentRoutes["Agent Routes"]
+        TodoRoutes["Todo Routes"]
+        TimeLogRoutes["Time Log Routes"]
+    end
+
+    subgraph Agent["Agent Layer"]
+        Graph["LangGraph StateGraph"]
+        Intent["Intent Classifier"]
+        Extractor["Task Extractor"]
+        Clarify["Clarification Node"]
+        Response["Response Generator"]
+    end
+
+    subgraph Domain["Domain Services"]
+        TodoService["Todo Service"]
+        TimeLogService["Time Log Service"]
+        MatchingService["Matching Service"]
+        VoiceService["Voice Service"]
+    end
+
+    subgraph Data["Data Layer"]
+        Repo["Repositories"]
+        DB[("SQLite / PostgreSQL")]
+    end
+
+    React --> AgentRoutes
+    Electron --> React
+    Audio --> AgentRoutes
+    AgentRoutes --> VoiceService
+    AgentRoutes --> Graph
+    TodoRoutes --> TodoService
+    TimeLogRoutes --> TimeLogService
+    Graph --> Intent
+    Graph --> Extractor
+    Graph --> MatchingService
+    Graph --> Clarify
+    Graph --> Response
+    Graph --> TodoService
+    Graph --> TimeLogService
+    TodoService --> Repo
+    TimeLogService --> Repo
+    MatchingService --> Repo
+    Repo --> DB
+
