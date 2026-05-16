@@ -1,33 +1,35 @@
 flowchart TD
     Start([START])
-    Normalize["Normalize input<br/>clean transcript and resolve relative dates"]
-    Intent["Classify intent"]
-    Add["Add todo node"]
-    List["List todo node"]
-    Update["Update todo node"]
-    Delete["Delete todo node"]
-    Progress["Progress update node"]
-    Match["Match spoken items<br/>to existing tasks"]
+    Normalize["normalize_input<br/>clean text and dates"]
+    Intent["detect_intent"]
+    Extract["extract_entities"]
+    Match["match_task<br/>when existing task is referenced"]
     Clarify{"Need clarification?"}
-    Execute["Execute tool"]
-    Log["Create or update time log"]
-    Respond["Generate response"]
+    Decide["decide_action"]
+    Create["create_task"]
+    Update["update_task"]
+    Complete["complete_task"]
+    Delete["delete_task"]
+    Prioritize["prioritize_task"]
+    Query["query_tasks"]
+    Log["log_task_action"]
+    Respond["generate_response"]
     End([END])
 
-    Start --> Normalize --> Intent
-    Intent -->|"add_todo"| Add
-    Intent -->|"list_todo"| List
-    Intent -->|"update_todo"| Update
-    Intent -->|"delete_todo"| Delete
-    Intent -->|"progress_update"| Progress
-    Add --> Clarify
-    Update --> Clarify
-    Delete --> Clarify
-    Progress --> Match --> Clarify
-    List --> Execute
+    Start --> Normalize --> Intent --> Extract --> Match --> Clarify
     Clarify -->|"yes"| Respond
-    Clarify -->|"no"| Execute
-    Execute --> Log
-    Execute --> Respond
+    Clarify -->|"no"| Decide
+    Decide -->|"create"| Create
+    Decide -->|"update"| Update
+    Decide -->|"complete"| Complete
+    Decide -->|"delete"| Delete
+    Decide -->|"prioritize"| Prioritize
+    Decide -->|"query"| Query
+    Create --> Log
+    Update --> Log
+    Complete --> Log
+    Delete --> Log
+    Prioritize --> Log
+    Query --> Log
     Log --> Respond
     Respond --> End

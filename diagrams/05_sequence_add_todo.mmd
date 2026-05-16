@@ -1,23 +1,19 @@
 sequenceDiagram
     actor User
-    participant UI as Voice UI
+    participant UI as Main UI
     participant API as FastAPI
-    participant STT as STT Service
-    participant Graph as LangGraph Agent
-    participant Tool as Todo Tool
-    participant DB as Database
+    participant Graph as LangGraph
+    participant Tool as Task Tools
+    participant DB as PostgreSQL
 
-    User->>UI: Speaks morning plan
-    UI->>API: Upload audio
-    API->>STT: Transcribe audio
-    STT-->>API: Transcript
-    API->>Graph: Run graph with transcript
-    Graph->>Graph: Classify intent as add_todo
-    Graph->>Graph: Extract task fields
-    Graph->>Tool: create_tasks(tasks)
-    Tool->>DB: Insert pending tasks
-    DB-->>Tool: Created tasks
-    Tool-->>Graph: Tool result
-    Graph-->>API: Response text and task list
-    API-->>UI: Transcript, response, tasks
-    UI-->>User: Displays response and tasks
+    User->>UI: Type "Add gym at 7 PM"
+    UI->>API: POST /agent/message
+    API->>Graph: tenant_id + message
+    Graph->>Tool: create_task(tenant_id, title, time)
+    Tool->>DB: insert into tasks
+    Tool->>DB: insert into task_logs
+    DB-->>Tool: saved task
+    Tool-->>Graph: created task
+    Graph-->>API: response + task state
+    API-->>UI: JSON response
+    UI-->>User: Show "Added gym at 7 PM"

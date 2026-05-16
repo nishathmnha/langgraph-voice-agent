@@ -1,52 +1,30 @@
 flowchart TB
-    subgraph Client["Client Layer"]
-        React["React UI"]
-        Electron["Electron Shell"]
-        Audio["Audio Recorder"]
+    subgraph Frontend["Frontend"]
+        Setup["Setup Screen"]
+        TextInput["Text Input"]
+        Mic["Microphone Button"]
+        TaskList["Task List"]
     end
 
-    subgraph API["FastAPI Layer"]
+    subgraph Backend["FastAPI Backend"]
+        UserRoutes["User Routes"]
         AgentRoutes["Agent Routes"]
-        TodoRoutes["Todo Routes"]
-        TimeLogRoutes["Time Log Routes"]
+        VoiceService["Speech-to-Text Service"]
+        Graph["LangGraph Workflow"]
+        TaskTools["Task Tools"]
+        DBAccess["Database Access"]
     end
 
-    subgraph Agent["Agent Layer"]
-        Graph["LangGraph StateGraph"]
-        Intent["Intent Classifier"]
-        Extractor["Task Extractor"]
-        Clarify["Clarification Node"]
-        Response["Response Generator"]
-    end
+    DB[("PostgreSQL")]
 
-    subgraph Domain["Domain Services"]
-        TodoService["Todo Service"]
-        TimeLogService["Time Log Service"]
-        MatchingService["Matching Service"]
-        VoiceService["Voice Service"]
-    end
-
-    subgraph Data["Data Layer"]
-        Repo["Repositories"]
-        DB[("SQLite / PostgreSQL")]
-    end
-
-    React --> AgentRoutes
-    Electron --> React
-    Audio --> AgentRoutes
+    Setup --> UserRoutes
+    TextInput --> AgentRoutes
+    Mic --> AgentRoutes
     AgentRoutes --> VoiceService
     AgentRoutes --> Graph
-    TodoRoutes --> TodoService
-    TimeLogRoutes --> TimeLogService
-    Graph --> Intent
-    Graph --> Extractor
-    Graph --> MatchingService
-    Graph --> Clarify
-    Graph --> Response
-    Graph --> TodoService
-    Graph --> TimeLogService
-    TodoService --> Repo
-    TimeLogService --> Repo
-    MatchingService --> Repo
-    Repo --> DB
-
+    Graph --> TaskTools
+    TaskTools --> DBAccess
+    UserRoutes --> DBAccess
+    DBAccess --> DB
+    DB --> DBAccess
+    DBAccess --> TaskList

@@ -1,113 +1,67 @@
-# Minimal LangGraph Todo MVP
+# Minimal LangGraph TODO MVP
 
 ## Goal
 
-Build a small LangGraph workflow that processes transcribed audio and updates a todo list.
-
-Keep STT outside LangGraph:
+Build a small LangGraph workflow that processes typed text or transcribed voice and updates a tenant-scoped TODO list.
 
 ```text
-Audio input -> Speech-to-text -> LangGraph -> Todo tools -> Database -> Text/UI response
+Voice or text input -> FastAPI -> optional STT -> LangGraph -> PostgreSQL -> UI response
 ```
 
-This is not a multi-agent system. It is a single LangGraph agent/workflow with tools.
+## Minimal Screens
+
+| Screen | Fields and controls |
+| --- | --- |
+| Registration/setup | API key, username |
+| Main UI | Text input, microphone button, task list, response area |
+
+## Tenant Setup
+
+The backend generates `tenant_id` during registration:
+
+```text
+tenant_id = "tenant_" + sha256(username)[0:8] + "_" + random_4_digits
+```
+
+Every database table includes `tenant_id`.
 
 ## Minimal LangGraph Nodes
 
 ```text
 START
-  ↓
-classify_intent
-  ↓
-route_intent
-  ↓
-[add_todo | update_todo | complete_todo | list_todos | clarify]
-  ↓
+  |
+normalize_input
+  |
+detect_intent
+  |
+extract_entities
+  |
+match_task when needed
+  |
+decide_action
+  |
+execute_tool
+  |
 generate_response
-  ↓
+  |
 END
 ```
 
-## Nodes Needed
+## Supported Actions
 
-| Node | Purpose |
+| Intent | Example |
 | --- | --- |
-| `classify_intent` | Decide what the user wants: add, update, complete, list, or clarify. |
-| `add_todo` | Extract tasks from transcript and save them. |
-| `update_todo` | Change priority, due date, title, or notes. |
-| `complete_todo` | Match spoken completed task to existing todo and mark it completed. |
-| `list_todos` | Fetch today's pending/completed todos. |
-| `clarify` | Ask a short question when task or detail is unclear. |
-| `generate_response` | Return simple text for UI. |
-
-## Minimal Tools
-
-| Tool | Purpose |
-| --- | --- |
-| `create_todo(title, due_date, priority)` | Add new todo. |
-| `list_todos(date, status)` | Get todos. |
-| `update_todo(todo_id, fields)` | Change priority/details/status. |
-| `complete_todo(todo_id, note)` | Mark completed and create time log. |
-| `find_matching_todo(text)` | Fuzzy match spoken task to saved todo. |
-
-## Minimal Intents
-
-```python
-ADD_TODO
-UPDATE_TODO
-COMPLETE_TODO
-LIST_TODOS
-CLARIFY
-```
-
-## Simple Flows
-
-### Add Todo
-
-```text
-"I need to fix loan API today"
--> classify_intent: ADD_TODO
--> add_todo
--> create_todo()
--> response: "Added: Fix loan API."
-```
-
-### Update Priority
-
-```text
-"Make loan API high priority"
--> classify_intent: UPDATE_TODO
--> update_todo
--> find_matching_todo()
--> update_todo()
--> response: "Updated priority to high."
-```
-
-### Complete Todo
-
-```text
-"I completed the loan API task"
--> classify_intent: COMPLETE_TODO
--> complete_todo
--> find_matching_todo()
--> complete_todo()
--> response: "Marked loan API as completed."
-```
-
-### List Todos
-
-```text
-"What is left today?"
--> classify_intent: LIST_TODOS
--> list_todos()
--> response: pending todos
-```
+| create_task | Add gym at 7 PM |
+| update_task | Update meeting time to 4 PM |
+| complete_task | Mark backend task as completed |
+| delete_task | Remove yesterday's pending task |
+| prioritize_task | Make backend task high priority |
+| query_tasks | What did I complete today? |
 
 ## Keep It Simple
 
-- Use one LangGraph workflow.
-- Use tools for database actions.
-- Use fuzzy matching only when updating or completing existing todos.
-- Ask clarification only when task matching or required details are unclear.
-- Do not add TTS/audio response for the MVP.
-
+- Use one LangGraph workflow with task tools.
+- Keep speech-to-text outside the graph.
+- Scope every tool call by `tenant_id`.
+- Log every create, update, complete, delete, and query action.
+- Ask a clarification question only when task matching is uncertain.

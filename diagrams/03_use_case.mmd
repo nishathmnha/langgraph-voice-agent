@@ -1,31 +1,30 @@
 flowchart LR
     User((User))
-    ReportClient((Dashboard / Report Client))
 
-    subgraph System["Voice Todo Agent"]
-        UC1["Create morning plan"]
-        UC2["Add todo"]
-        UC3["View todos"]
-        UC4["Update todo"]
-        UC5["Delete / archive todo"]
-        UC6["Speak completed work"]
-        UC7["Clarify missing details"]
-        UC8["Fuzzy-match progress"]
-        UC9["Create time log"]
-        UC10["Get time logs by date range"]
-        UC11["Generate daily summary"]
+    subgraph System["Voice Agent TODO System"]
+        Register["Register / setup"]
+        Text["Submit text command"]
+        Voice["Submit voice command"]
+        Add["Store TODO task"]
+        Update["Update existing task"]
+        Complete["Mark task completed"]
+        Delete["Remove task"]
+        Priority["Prioritize task"]
+        Query["Ask task questions"]
     end
 
-    User --> UC1
-    User --> UC2
-    User --> UC3
-    User --> UC4
-    User --> UC5
-    User --> UC6
-    UC2 --> UC7
-    UC6 --> UC8
-    UC8 --> UC7
-    UC8 --> UC9
-    ReportClient --> UC10
-    User --> UC11
-
+    User --> Register
+    User --> Text
+    User --> Voice
+    Text --> Add
+    Text --> Update
+    Text --> Complete
+    Text --> Delete
+    Text --> Priority
+    Text --> Query
+    Voice --> Add
+    Voice --> Update
+    Voice --> Complete
+    Voice --> Delete
+    Voice --> Priority
+    Voice --> Query

@@ -1,26 +1,22 @@
 flowchart TD
-    A([Start day])
-    B["User speaks morning plan"]
-    C["Transcribe audio"]
-    D["Extract tasks"]
-    E{"Any missing required detail?"}
-    F["Ask clarification"]
-    G["Store pending tasks"]
-    H["User works during day"]
-    I["User speaks completed items"]
-    J["Transcribe progress update"]
-    K["Fuzzy-match spoken items to tasks"]
-    L{"Match confidence high?"}
-    M["Mark tasks completed"]
-    N["Create time logs"]
-    O["Ask user to confirm matching task"]
-    P["Show completed and remaining tasks"]
-    Q["Suggest next priority"]
-    R([End])
+    Start([Start])
+    Setup{"Registered?"}
+    Register["Enter username and API key"]
+    Tenant["Generate tenant_id"]
+    Main["Open main UI"]
+    Choice{"Input method"}
+    Text["Type command"]
+    Voice["Record audio"]
+    STT["Convert speech to text"]
+    Agent["Run LangGraph workflow"]
+    DB["Update PostgreSQL using tenant_id"]
+    UI["Show response and refreshed tasks"]
+    End([End])
 
-    A --> B --> C --> D --> E
-    E -->|"yes"| F --> D
-    E -->|"no"| G --> H --> I --> J --> K --> L
-    L -->|"yes"| M --> N --> P --> Q --> R
-    L -->|"no"| O --> M
-
+    Start --> Setup
+    Setup -->|"no"| Register --> Tenant --> Main
+    Setup -->|"yes"| Main
+    Main --> Choice
+    Choice -->|"text"| Text --> Agent
+    Choice -->|"voice"| Voice --> STT --> Agent
+    Agent --> DB --> UI --> End

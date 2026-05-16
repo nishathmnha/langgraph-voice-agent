@@ -1,29 +1,25 @@
 sequenceDiagram
     actor User
-    participant UI as Voice UI
+    participant UI as Main UI
     participant API as FastAPI
-    participant Graph as LangGraph Agent
-    participant Match as Matching Service
-    participant Todo as Todo Service
-    participant Log as Time Log Service
-    participant DB as Database
+    participant STT as Speech-to-Text
+    participant Graph as LangGraph
+    participant Tool as Task Tools
+    participant DB as PostgreSQL
 
-    User->>UI: "I completed the loan API bug"
-    UI->>API: Send transcript or audio result
-    API->>Graph: Run progress update graph
-    Graph->>DB: Load active tasks for today
-    DB-->>Graph: Active tasks
-    Graph->>Match: Compare spoken item with tasks
-    Match-->>Graph: Best match and confidence
-    alt High confidence
-        Graph->>Todo: mark_completed(task_id)
-        Todo->>DB: Update task status and completed_at
-        Graph->>Log: create_time_log(task_id)
-        Log->>DB: Insert time log
-        Graph-->>API: Completed and remaining tasks
-    else Ambiguous match
-        Graph-->>API: Ask user to confirm candidate
-    end
-    API-->>UI: Response
-    UI-->>User: Shows result
-
+    User->>UI: Say "Mark backend task as completed"
+    UI->>API: POST /agent/voice with audio
+    API->>STT: transcribe audio
+    STT-->>API: "Mark backend task as completed"
+    API->>Graph: tenant_id + transcript
+    Graph->>Tool: query candidate tasks
+    Tool->>DB: select tasks where tenant_id and status pending
+    DB-->>Tool: candidate tasks
+    Tool-->>Graph: best match
+    Graph->>Tool: complete_task(tenant_id, task_id)
+    Tool->>DB: update tasks set status completed
+    Tool->>DB: insert into task_logs
+    Tool-->>Graph: completion result
+    Graph-->>API: response + updated task
+    API-->>UI: JSON response
+    UI-->>User: Show completed status

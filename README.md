@@ -1,24 +1,28 @@
-# Voice Todo Agent Documentation Pack
+# Voice Agent TODO List
 
-This repository contains the minimal planning documentation for a LangGraph-based voice-input todo system.
+Minimal documentation pack for an AI-assisted TODO management system using LangGraph, FastAPI, Python, and PostgreSQL.
 
-The system lets a user speak todos, update priorities, mark tasks completed, list todos, and store completion time logs.
-
-There is no audio response in the current scope. The system returns transcripts, updated todos, time-log data, and short text responses for the UI.
+The product supports text input and voice input. Voice is transcribed to text, then the same LangGraph workflow handles task creation, updates, completion, deletion, prioritization, and natural-language queries.
 
 ## Contents
 
-- `docs/minimal_langgraph_mvp.md` - The single source of truth for the minimal LangGraph MVP
-- `diagrams/*.mmd` - Mermaid UML/architecture sources
-- `exports/png/*.png` - Rendered diagram images
-- `exports/pdf/minimal_langgraph_mvp.pdf` - The minimal PDF document
-- `scripts/export_docs.py` - Simple offline Markdown-to-PDF exporter
+- `docs/product_brief.md` - compact product scope and MVP boundaries
+- `docs/architecture.md` - backend, frontend, voice, and data architecture
+- `docs/database_schema.md` - PostgreSQL multi-tenant tables
+- `docs/api_contract.md` - minimal FastAPI endpoints and payloads
+- `docs/langgraph_workflow.md` - LangGraph nodes, routing, and tool responsibilities
+- `docs/minimal_langgraph_mvp.md` - one-page implementation summary
+- `diagrams/*.mmd` - Mermaid UML and architecture diagram sources
+- `exports/png/*.png` - rendered diagram PNG files
+- `exports/pdf/*.pdf` - rendered document and diagram PDF files
+- `scripts/export_docs.py` - offline exporter for Markdown and Mermaid assets
 
-## Main MVP Flow
+## MVP Flow
 
-1. User speaks through a push-to-talk UI.
-2. Audio is transcribed to text.
-3. LangGraph classifies intent.
-4. The graph routes to add, update, complete, list, or clarify.
-5. Todo tools update the database.
-6. The UI receives updated todo state and a text response.
+1. User registers with `username` and `api_key`.
+2. Backend generates a `tenant_id` from the username hash plus a random suffix.
+3. User submits either text or voice.
+4. Voice input is transcribed before entering the LangGraph workflow.
+5. LangGraph detects intent and routes to the correct task tool.
+6. Tools read and write PostgreSQL rows scoped by `tenant_id`.
+7. FastAPI returns the response text and updated task state to the UI.

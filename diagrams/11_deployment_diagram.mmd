@@ -1,24 +1,14 @@
-flowchart LR
-    subgraph LocalMachine["User Machine"]
-        UI["Electron / Browser UI"]
-        API["FastAPI App<br/>localhost:8000"]
-        SQLite[("SQLite DB File")]
-    end
+flowchart TB
+    Browser["User Browser"]
+    Frontend["Frontend App"]
+    API["FastAPI App Container"]
+    Graph["LangGraph Runtime"]
+    DB[("PostgreSQL Container")]
+    STT["Speech-to-Text Provider"]
 
-    subgraph External["External AI Services"]
-        LLM["LLM API"]
-        STT["STT API"]
-    end
-
-    subgraph FutureCloud["Future Cloud Deployment"]
-        Container["FastAPI Container"]
-        Postgres[("PostgreSQL")]
-        Auth["Auth Provider"]
-    end
-
-    UI --> API
-    API --> SQLite
-    API --> LLM
-    API --> STT
-    Container --> Postgres
-    Container --> Auth
+    Browser --> Frontend
+    Frontend -->|"HTTPS JSON / audio upload"| API
+    API -->|"audio"| STT
+    STT -->|"transcript"| API
+    API --> Graph
+    Graph -->|"tenant scoped SQL"| DB

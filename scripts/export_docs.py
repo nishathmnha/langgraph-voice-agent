@@ -1,13 +1,15 @@
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
+import shutil
+import subprocess
 import textwrap
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DOCS = [
-    ROOT / "docs" / "minimal_langgraph_mvp.md",
-]
-OUT = ROOT / "exports" / "pdf"
+DOCS_DIR = ROOT / "docs"
+DIAGRAMS_DIR = ROOT / "diagrams"
+PDF_OUT = ROOT / "exports" / "pdf"
+PNG_OUT = ROOT / "exports" / "png"
 
 
 def load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
@@ -37,12 +39,11 @@ def line_height(font: ImageFont.ImageFont) -> int:
 def wrap_line(text: str, max_chars: int) -> list[str]:
     if not text:
         return [""]
-    prefix = ""
     stripped = text.lstrip()
     if stripped.startswith("- "):
-        prefix = "- "
-        text = stripped[2:]
-    return textwrap.wrap(text, width=max_chars, subsequent_indent="  ", initial_indent=prefix) or [prefix]
+        wrapped = textwrap.wrap(stripped[2:], width=max_chars - 2)
+        return [f"- {line}" if i == 0 else f"  {line}" for i, line in enumerate(wrapped)]
+    return textwrap.wrap(text, width=max_chars) or [""]
 
 
 def md_to_pages(title: str, content: str) -> list[Image.Image]:
@@ -80,11 +81,7 @@ def md_to_pages(title: str, content: str) -> list[Image.Image]:
             font = H2_FONT
             text = line[3:]
             spacing = 8
-        elif line.startswith("|"):
-            font = CODE_FONT
-            text = line
-            spacing = 2
-        elif in_code:
+        elif line.startswith("|") or in_code:
             font = CODE_FONT
             text = line
             spacing = 2
@@ -105,17 +102,39 @@ def md_to_pages(title: str, content: str) -> list[Image.Image]:
 
 
 def export_pdf(path: Path, output: Path):
-    pages = md_to_pages(path.stem.replace("_", " "), path.read_text(encoding="utf-8"))
+    title = path.stem.replace("_", " ").title()
+    pages = md_to_pages(title, path.read_text(encoding="utf-8"))
     first, rest = pages[0], pages[1:]
     first.save(output, save_all=True, append_images=rest)
 
 
+def export_mermaid(diagram: Path, output: Path):
+    mmdc = shutil.which("mmdc")
+    if not mmdc:
+        raise RuntimeError("Mermaid CLI (mmdc) was not found on PATH.")
+    subprocess.run(
+        [mmdc, "-i", str(diagram), "-o", str(output), "-b", "white"],
+        check=True,
+    )
+
+
 def main():
-    OUT.mkdir(parents=True, exist_ok=True)
-    for doc in DOCS:
-        output = OUT / f"{doc.stem}.pdf"
-        export_pdf(doc, output)
-    print(f"Exported {len(DOCS)} document PDF to {OUT}")
+    PDF_OUT.mkdir(parents=True, exist_ok=True)
+    PNG_OUT.mkdir(parents=True, exist_ok=True)
+
+    docs = sorted(DOCS_DIR.glob("*.md"))
+    diagrams = sorted(DIAGRAMS_DIR.glob("*.mmd"))
+
+    for doc in docs:
+        export_pdf(doc, PDF_OUT / f"{doc.stem}.pdf")
+
+    for diagram in diagrams:
+        export_mermaid(diagram, PNG_OUT / f"{diagram.stem}.png")
+        export_mermaid(diagram, PDF_OUT / f"{diagram.stem}.pdf")
+
+    print(f"Exported {len(docs)} document PDFs to {PDF_OUT}")
+    print(f"Exported {len(diagrams)} diagram PNGs to {PNG_OUT}")
+    print(f"Exported {len(diagrams)} diagram PDFs to {PDF_OUT}")
 
 
 if __name__ == "__main__":

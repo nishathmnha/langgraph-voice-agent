@@ -1,22 +1,23 @@
 flowchart LR
     User["User"]
-    VoiceUI["Voice UI<br/>React or Electron"]
-    FastAPI["FastAPI Backend"]
-    STT["Speech-to-Text Provider"]
-    Agent["LangGraph Todo Agent"]
-    Tools["Todo and Time Log Tools"]
-    DB[("SQLite / PostgreSQL")]
-    Dashboard["Dashboard / Reports"]
+    UI["Web UI<br/>registration, text, microphone"]
+    API["FastAPI Backend"]
+    STT["Speech-to-Text Service"]
+    Graph["LangGraph TODO Agent"]
+    Tools["Tenant-Scoped Task Tools"]
+    DB[("PostgreSQL")]
 
-    User -->|"speaks / types"| VoiceUI
-    VoiceUI -->|"audio upload"| FastAPI
-    VoiceUI -->|"text message"| FastAPI
-    FastAPI --> STT
-    STT -->|"transcript"| FastAPI
-    FastAPI --> Agent
-    Agent --> Tools
-    Tools --> DB
-    Agent -->|"response text"| FastAPI
-    FastAPI -->|"updated todos and text response"| VoiceUI
-    FastAPI -->|"time log API"| Dashboard
-    VoiceUI -->|"shows tasks and response"| User
+    User -->|"registers, types, speaks"| UI
+    UI -->|"username + api_key"| API
+    UI -->|"text command"| API
+    UI -->|"audio file"| API
+    API -->|"audio"| STT
+    STT -->|"transcript"| API
+    API -->|"tenant_id + text"| Graph
+    Graph --> Tools
+    Tools -->|"tenant_id filtered SQL"| DB
+    DB --> Tools
+    Tools --> Graph
+    Graph -->|"response + task state"| API
+    API -->|"JSON response"| UI
+    UI -->|"shows tasks and response"| User
